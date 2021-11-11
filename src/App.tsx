@@ -1,47 +1,54 @@
-import * as React from 'react'
-import logo from './logo.svg'
+import * as React from "react";
+import logo from "./logo.svg";
 
 type RowType = {
-  width: number
-  rowNumber: number,
-  snake: number[],
-  food: number | null,
-}
+  width: number;
+  rowNumber: number;
+  snake: number[];
+  food: number | null;
+};
 
 type BlockType = {
-  id: number,
-  snake: boolean,
-  food: boolean,
-}
+  id: number;
+  snake: boolean;
+  food: boolean;
+};
 
-const Block = ({ id, snake, food } : BlockType) => {
-
-  const color = snake ? 'white' : food ? 'red' : 'black';
+const Block = ({ id, snake, food }: BlockType) => {
+  const color = snake ? "white" : food ? "red" : "black";
 
   return (
-    <div className={`${id}`} style={{height: '20px', width: '20px', margin: '1px', backgroundColor: `${color}`}}></div>
-  )
-}
+    <div
+      className={`${id}`}
+      style={{
+        height: "20px",
+        width: "20px",
+        margin: "1px",
+        backgroundColor: `${color}`,
+      }}
+    ></div>
+  );
+};
 
-const Row = ( { width, rowNumber, snake, food} : RowType) => {
-
+const Row = ({ width, rowNumber, snake, food }: RowType) => {
   const renderRow = () => {
+    const row = [];
 
-    const row  = [];
-
-    for(let x = 0; x < width; x++) {
-      row.push(<Block id={rowNumber + x} snake={snake.includes(rowNumber + x) ? true : false} food={rowNumber + x === food ? true : false}/>)
+    for (let x = 0; x < width; x++) {
+      row.push(
+        <Block
+          id={rowNumber + x}
+          snake={snake.includes(rowNumber + x) ? true : false}
+          food={rowNumber + x === food ? true : false}
+        />
+      );
     }
 
     return row;
-  }
+  };
 
-  return (
-    <div style={{display: 'flex'}}>
-      {renderRow()}
-    </div>
-  )
-}
+  return <div style={{ display: "flex" }}>{renderRow()}</div>;
+};
 
 enum Direction {
   Right = 1,
@@ -51,98 +58,116 @@ enum Direction {
 }
 
 type GameState = {
-  snake: number[],
-  food: number | null,
-}
+  snake: number[];
+  food: number | null;
+};
 
 function App() {
-
-  const [gameState, setGameState] = React.useState<GameState>({snake: [0], food: null})
+  const [gameState, setGameState] = React.useState<GameState>({
+    snake: [0],
+    food: null,
+  });
 
   const [snake, setSnake] = React.useState<number[]>([0, 1]);
   const [started, setStarted] = React.useState<boolean>(false);
-  const [food, setFood] = React.useState<number | null>(null)
+  const [food, setFood] = React.useState<number | null>(null);
 
   let direction = Direction.Down;
 
-  document.addEventListener('keydown', (e : KeyboardEvent) => {
-    switch(e.key) {
-      case 'w':
-        if(direction != Direction.Down) direction = Direction.Up
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    switch (e.key) {
+      case "w":
+        if (direction != Direction.Down) direction = Direction.Up;
         break;
-      case 'a':
-        if(direction != Direction.Right) direction = Direction.Left
+      case "a":
+        if (direction != Direction.Right) direction = Direction.Left;
         break;
-      case 's':
-        if(direction != Direction.Up) direction = Direction.Down
+      case "s":
+        if (direction != Direction.Up) direction = Direction.Down;
         break;
-      case 'd':
-        if(direction != Direction.Left) direction = Direction.Right
+      case "d":
+        if (direction != Direction.Left) direction = Direction.Right;
         break;
     }
-  })
+  });
 
-  const getRandomFoodPosition = (state: number[]) : number => {
+  const getRandomFoodPosition = (state: number[]): number => {
     const randomPosition = Math.floor(Math.random() * 400);
 
-    return state.includes(randomPosition) ? getRandomFoodPosition(state) : randomPosition;
+    return state.includes(randomPosition)
+      ? getRandomFoodPosition(state)
+      : randomPosition;
+  };
 
-  }
-  
   React.useEffect(() => {
     if (!started) return;
 
     const loop = setInterval(() => {
-      console.log(Math.random())
-      setGameState(state => {
-        if(!state.food) {
-          return { snake: [state.snake[0] + direction], food: getRandomFoodPosition([state.snake[0] + direction])}
+      console.log(Math.random());
+      setGameState((state) => {
+        if (!state.food) {
+          return {
+            snake: [state.snake[0] + direction],
+            food: getRandomFoodPosition([state.snake[0] + direction]),
+          };
         }
-        if(state.snake[state.snake.length - 1] + direction === state.food) {
-          if(state.snake.length < 2) {
-            return { snake: [state.snake[0], state.snake[0] + direction], food: getRandomFoodPosition([state.snake[0], state.snake[0] + direction])}
+        if (state.snake[state.snake.length - 1] + direction === state.food) {
+          if (state.snake.length < 2) {
+            return {
+              snake: [state.snake[0], state.snake[0] + direction],
+              food: getRandomFoodPosition([
+                state.snake[0],
+                state.snake[0] + direction,
+              ]),
+            };
           } else {
-            let newSnake; 
+            let newSnake;
             newSnake = [...state.snake];
             newSnake.push(newSnake[newSnake.length - 1] + direction);
 
-          return { snake: newSnake, food: getRandomFoodPosition(newSnake)}
+            return { snake: newSnake, food: getRandomFoodPosition(newSnake) };
           }
         }
 
-        if(state.snake.length < 2) {
-          return { snake: [state.snake[0] + direction], food: state.food}
+        if (state.snake.length < 2) {
+          return { snake: [state.snake[0] + direction], food: state.food };
         } else {
-
-          let newSnake; 
+          let newSnake;
           newSnake = [...state.snake];
           newSnake.shift();
           newSnake.push(newSnake[newSnake.length - 1] + direction);
 
-          return { snake: newSnake, food: state.food}
+          return { snake: newSnake, food: state.food };
         }
-      })
+      });
     }, 80);
 
     return () => clearInterval(loop);
-  }, [started])
+  }, [started]);
 
   const renderBlocks = () => {
     const blocks = [];
 
-    for(let x = 0; x < 20; x++) {
-      blocks.push(<Row food={gameState.food} width={20} rowNumber={x * 20} snake={gameState.snake}/>)
+    for (let x = 0; x < 20; x++) {
+      blocks.push(
+        <Row
+          food={gameState.food}
+          width={20}
+          rowNumber={x * 20}
+          snake={gameState.snake}
+        />
+      );
     }
 
     return blocks;
-  }
+  };
 
   return (
     <div className="App">
       {renderBlocks()}
       <button onClick={() => setStarted(true)}>Start</button>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
