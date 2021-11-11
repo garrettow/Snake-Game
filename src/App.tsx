@@ -14,6 +14,18 @@ type BlockType = {
   food: boolean;
 };
 
+type GameState = {
+  snake: number[];
+  food: number | null;
+};
+
+enum Direction {
+  Right = 1,
+  Left = -1,
+  Up = -20,
+  Down = 20,
+}
+
 const Block = ({ id, snake, food }: BlockType) => {
   const color = snake ? "white" : food ? "red" : "black";
 
@@ -48,18 +60,6 @@ const Row = ({ width, rowNumber, snake, food }: RowType) => {
   };
 
   return <div style={{ display: "flex" }}>{renderRow()}</div>;
-};
-
-enum Direction {
-  Right = 1,
-  Left = -1,
-  Up = -20,
-  Down = 20,
-}
-
-type GameState = {
-  snake: number[];
-  food: number | null;
 };
 
 function App() {
@@ -103,7 +103,6 @@ function App() {
     if (!started) return;
 
     const loop = setInterval(() => {
-      console.log(Math.random());
       setGameState((state) => {
         if (!state.food) {
           return {
