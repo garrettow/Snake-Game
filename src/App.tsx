@@ -1,5 +1,4 @@
 import * as React from "react";
-import logo from "./logo.svg";
 
 type RowType = {
   width: number;
@@ -68,8 +67,8 @@ function App() {
     food: null,
   });
 
-  const [snake, setSnake] = React.useState<number[]>([0, 1]);
-  const [started, setStarted] = React.useState<boolean>(false);
+  const [snake, setSnake] = React.useState([0, 1]);
+  const [started, setStarted] = React.useState(false);
   const [food, setFood] = React.useState<number | null>(null);
 
   let direction = Direction.Down;
@@ -99,17 +98,66 @@ function App() {
       : randomPosition;
   };
 
+  const collidingWithWall = (state: number[]): boolean => {
+    const head = state[state.length - 1];
+
+    let isColliding = false;
+
+    switch (direction) {
+      case Direction.Right:
+        if ((head + direction) % 20 === 0) {
+          isColliding = true;
+        }
+        break;
+      case Direction.Left:
+        if (head % 20 === 0) {
+          isColliding = true;
+        }
+        break;
+      case Direction.Up:
+        if (head + direction < 0) {
+          isColliding = true;
+        }
+        break;
+      case Direction.Down:
+        if (head + direction >= 399) {
+          isColliding = true;
+        }
+        break;
+      default:
+        return false;
+    }
+
+    return isColliding;
+  };
+
+  const collidingWithItself = (state: number[]): boolean => {
+    const head = state[state.length - 1] + direction;
+
+    let isColliding = false;
+
+    if (state.includes(head)) {
+      return true;
+    }
+
+    return isColliding;
+  };
+
   React.useEffect(() => {
     if (!started) return;
 
     const loop = setInterval(() => {
       setGameState((state) => {
+        let newSnake;
+        newSnake = [...state.snake];
+
         if (!state.food) {
           return {
-            snake: [state.snake[0] + direction],
-            food: getRandomFoodPosition([state.snake[0] + direction]),
+            snake: [newSnake[0] + direction],
+            food: getRandomFoodPosition([newSnake[0] + direction]),
           };
         }
+
         if (state.snake[state.snake.length - 1] + direction === state.food) {
           if (state.snake.length < 2) {
             return {
@@ -120,19 +168,19 @@ function App() {
               ]),
             };
           } else {
-            let newSnake;
-            newSnake = [...state.snake];
             newSnake.push(newSnake[newSnake.length - 1] + direction);
-
             return { snake: newSnake, food: getRandomFoodPosition(newSnake) };
           }
+        } else if (
+          collidingWithWall(newSnake) ||
+          collidingWithItself(newSnake)
+        ) {
+          alert("test");
         }
 
         if (state.snake.length < 2) {
           return { snake: [state.snake[0] + direction], food: state.food };
         } else {
-          let newSnake;
-          newSnake = [...state.snake];
           newSnake.shift();
           newSnake.push(newSnake[newSnake.length - 1] + direction);
 
